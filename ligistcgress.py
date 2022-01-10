@@ -6,7 +6,7 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-
+# git tag 1.0
 class Logisticregress():
     def __init__(self,features=None,labels=None,batch_size=None,epoch=None,beta=None,eta=None):
         """
@@ -32,6 +32,7 @@ class Logisticregress():
         :param dim: len(beta)
         :return: features ,labels
         """
+        np.random.seed(10)
         beta = np.random.normal(2, 1, (dim, 1)).astype((int))
         features = np.random.normal(0, 1, (num_examples, dim))
         labels = 1/(1+np.exp(np.dot(features,beta)))
@@ -63,7 +64,7 @@ class Logisticregress():
             batch_index = np.array(index[i:min(i+batch_size,num_examples)])
             yield features[batch_index], labels[batch_index]
 
-    def init_para(self,beta= np.random.normal(2, 1,(4,1)).astype(int),eta=0.001): # how to set defalt paras
+    def init_para(self,beta= np.random.normal(2, 1,(4,1)).astype(int),eta=0.01): # how to set defalt paras
         return beta,eta
 
     def logisreg(self,features, beta):
@@ -87,12 +88,13 @@ class Logisticregress():
 
     def bgd(self,X,y_true,y_hat):
         """
-        derivation of loss function to parameter
+        derivation of loss function to parameter, mini-batch SDG
         :param X:
         :param y_true:
         :param y_hat:
         :return:
         """
+        # mini batch SGD
         n = len(X)
         return np.array(X).T@(y_hat-y_true)/n
 
@@ -106,6 +108,7 @@ class Logisticregress():
         #print("beta is:",beta,"\neta is:",eta)
         for epoch in range(epoches):
             for X,y_true  in self.iter_data(batch_size, features, labels):
+                # 在这个batch size上的梯度下降
                 # 在这个数据集合下进行反向传播，直到收敛
                 y_hat = self.logisreg(X, beta)
                 loss = self.zero_one_loss(y_hat, y_true)
@@ -115,13 +118,14 @@ class Logisticregress():
                 # Update parameters
                 beta = beta - eta * grad_beta
                 print("\n epoch:",epoch,"loss:",loss)
-        # Judgment convergence
-        if len(self.Loss)>10:
-            t= 0
-        for i in range(-1,-10,-1):
-            t += self.Loss[i]-self.Loss[i-1]
-            if np.abs(t/10)<0.1:
-                break
+            # Judgment convergence
+        if len(self.Loss)>5:
+            t = 0
+            for i in range(-1,-5,-1):
+                t += self.Loss[i]-self.Loss[i-1]
+                if np.abs(t/5)<0.1:
+                    print(self.Loss[-5:])
+                    break
         return beta
 
 
@@ -129,7 +133,7 @@ lr= Logisticregress()
 # load the data  the size of examples is num_examples and the size of features is dim
 features, labels, beta_true = lr.synthetic_data(num_examples = 100, dim = 4)
 # trian the model
-beta_predict = lr.train_data(1000,features, labels,batch_size= 20)
+beta_predict = lr.train_data(1000,features, labels,batch_size= 5)
 # plot the curve of the true beta
 fig, ax = plt.subplots(2,2)
 ax[0][0].plot(range(len(beta_true)),beta_true)
