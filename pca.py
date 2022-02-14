@@ -7,14 +7,32 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import calinski_harabasz_score
 from sklearn.neighbors import LocalOutlierFactor
-
+import seaborn as sns
 
 # 下载数据集
 iris = datasets.load_iris()
 x = iris.data
 y = iris.target
 target_names = iris.target_names
+# 一、数据预处理
+# 重复和缺失数据
+df = pd.DataFrame(x)
+print("data中缺失数据情况".format(df.isnull().sum()))
+print("data中重复数据情况".format(df.duplicated().sum()))
+# 二、数据探索
+# 1 数据描述
+print("".format(df.info()))
+print("数据总分布情况:\n{}".format(df.describe(include="all")))
+# 数据分布
+columns = df.columns
+print(df.head())
 
+
+for column in columns:
+    #print(df[column])
+    sns.displot(x,x = df[column],kde= True)
+    plt.title("column{}".format(column) )
+plt.show()
 # 0、离群点检测，获取正确的样本
 print("去除离群点之前样本大小：{}".format(len(x)))
 estimator = LocalOutlierFactor(n_neighbors= 5).fit_predict(list(x))
@@ -74,7 +92,7 @@ plt.scatter(list(range(2,30)),ch_score)
 #plt.xlabel("different cluster num")
 plt.xlabel("calinski_harabasz_score  image")
 # result：
-plt.show()
+#plt.show()
 
 # 确认cluster，得出聚类结果
 kmeans = KMeans(n_clusters=3).fit(reduced)
